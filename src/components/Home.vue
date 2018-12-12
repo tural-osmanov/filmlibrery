@@ -33,15 +33,41 @@
                     label(
                         for="radioSerial"
                     ) Serial
+                //- TOTAL TIME
                 .total-time
+                    //- Film Time 
                     .total-time__film(
                         v-if="whatWhatch === 'Film'"
                     )
-                        span Total Film Time
-                    .total-time__film(
+                        span.time-title Hours
+                        input.time-input(
+                            type="number"
+                            v-model="filmHours"
+                        )
+                        span.time-title Minutes
+                        input.time-input(
+                            type="number"
+                            v-model="filmMinutes"
+                        )
+                    //- Serial Time
+                    .total-time__serial(
                         v-if="whatWhatch === 'Serial'"
                     )
-                        span Total Serial Time
+                        span.time-title How many season?
+                        input.time-input(
+                            type="number"
+                            v-model="serialSeason"
+                        )
+                        span.time-title How many series?
+                        input.time-input(
+                            type="number"
+                            v-model="serialSeries"
+                        )
+                        span.time-title How long is one series? (minutes)
+                        input.time-input(
+                            type="number"
+                            v-model="serialSeriesMinutes"
+                        )
                 .tag-list
                     .ui-tag__wrapper
                         .ui-tag
@@ -58,28 +84,53 @@ export default {
             taskTitle: '',
             taskId: 3,
             taskDescription: '',
-            whatWhatch: 'Film'  
+            whatWhatch: 'Film',
+
+            // Total Time
+            // Film
+            filmHours: 1,
+            filmMinutes: 30,
+            // Serial
+            serialSeason: 1,
+            serialSeries: 11,
+            serialSeriesMinutes: 40
+
         }
     },
     methods:{
-        newTask(){
+        newTask () {
             if(this.taskTitle === ''){
                 return
             }
-            this.tasks.push({
+            const task = {
                 id: this.taskId,
                 title: this.taskTitle,
                 descriotion: this.taskDescription,
                 whatWhatch: this.whatWhatch,
                 completed: false,
                 editing: false
-            })
-
+            }
+            console.log(task)
             //Reset
             this.taskId += 1
             this.taskTitle = ''
             this.taskDescription = ''
+        },
+        getHoursAndMinutes (minutes) {
+            let hours = Math.trunc(minutes/60)
+            let min = minutes % 60
+            return hours + " Hours " + min + " Minutes"
         }
+    },
+    computed: {
+        filmTime () {
+            let min = this.filmHours * 60 + this.filmMinutes
+            return this.getHoursAndMinutes(min)
+        },
+        serialTime () {
+            let min = this.serialSeason * this.serialSeries * this.serialSeriesMinutes
+            return this.getHoursAndMinutes(min)
+        },
     }
 }
 </script>
@@ -95,27 +146,13 @@ export default {
         cursor pointer
         &:last
             margin-right 0
-.ui-label
-    margin-right 8px
-.task-item
+// Total time
+.total-time
     margin-bottom 20px
-    &:last
-        margin-bottom 0
-.task-item__info
-    display flex
-    text-align center
-    justify-content space-between
-    margin-bottom 20px
-    .button-close
-        width 20px
-        height @width
-.task-item__header
-    display flex
-    align-items center
-    margin-bottom 18px   
-    .ui-checkbox-wrapper
-        margin-right 8px
-        font-size: 21px;    
-    .ui-title-3
-        margin-bottom 0
+.time-title
+    display block
+    margin-bottom 6px
+.time-input
+    max-width 80px
+    margin-right 10px
 </style>
