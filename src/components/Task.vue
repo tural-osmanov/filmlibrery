@@ -13,7 +13,7 @@
                             .task-item__info
                                 .task-item__main-info 
                                     span.ui-label.ui-label--light {{task.whatWhatch}}
-                                    span Total Time 
+                                    span Total Time {{ task.time }}
                                 span.button-close
                             .task-item__content
                                 .task-item__header
@@ -25,30 +25,21 @@
                                     span.ui-title-3 {{ task.title }}
                                 .task-item__body
                                     p.ui-text-regular {{ task.descriotion }}
+                                .item__footer
+                                    .tag-list
+                                        .ui-tag__wrapper(
+                                            v-for="tag in task.tags"
+                                            :key="tag.title"
+                                        )
+                                            .ui-tag
+                                                span.tag-title {{ tag.title }}
 </template>
 
 <script>
 export default {
-    data(){
-        return{
-            tasks: [
-                {
-                    'id': 1,
-                    'title': "GrowthBusters: Hooked on Growth",
-                    'descriotion': 'I directed this documentary challenging the myths linking growth with prosperity and fullfilment.',
-                    'whatWhatch': 'Film',
-                    'comleted': false,
-                    'editing': false
-                },
-                {
-                    'id': 2,
-                    'title': "Game of Thrones",
-                    'descriotion': 'Best serials',
-                    'whatWhatch': 'Serial',
-                    'comleted': false,
-                    'editing': false
-                }
-            ]
+    computed: {
+        tasks () {
+            return this.$store.getters.tasks
         }
     }
 }

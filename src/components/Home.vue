@@ -49,6 +49,9 @@
                             type="number"
                             v-model="filmMinutes"
                         )
+                        
+                        p {{ filmTime }}
+
                     //- Serial Time
                     .total-time__serial(
                         v-if="whatWhatch === 'Serial'"
@@ -68,12 +71,47 @@
                             type="number"
                             v-model="serialSeriesMinutes"
                         )
-                .tag-list
-                    .ui-tag__wrapper
+                        p {{ serialTime }}
+                //- Список тегов
+                //- Добавть новый тег
+                .tag-list.tag-list--add
+                    .ui-tag__wrapper(
+                        @click="tagMenuShow = !tagMenuShow"
+                    )
                         .ui-tag
-                            span.tag-title Dogs
+                            span.tag-title Add New
+                            span.button-close(
+                                :class="{ active: !tagMenuShow }"
+                            )
+                //- Отображение инпута
+                .tag-list.tag-list--menu(
+                    v-if="tagMenuShow"
+                )
+                    input.tag-add--input(
+                        type="text"
+                        placeholder="New tag"
+                        v-model="tagTitle"
+                        @keyup.enter="newTag"
+                    )
+                    .button.button-default(
+                        @click="newTag"
+                    ) Send
+                .tag-list
+                    .ui-tag__wrapper(
+                        v-for="tag in tags"
+                        :key="tag.title"
+                    )
+                        .ui-tag(
+                            @click="addTagused(tag)"
+                            :class="{used: tag.use}"
+                        )
+                            span.tag-title {{ tag.title }}
                             span.button-close
-
+            p {{ tagsUsed }}
+                .button-list
+                    .button.button--round.button-primary(
+                        @click="newTask"
+                    ) Send
         
 </template>
 
@@ -82,7 +120,6 @@ export default {
     data(){
         return{
             taskTitle: '',
-            taskId: 3,
             taskDescription: '',
             whatWhatch: 'Film',
 
@@ -93,28 +130,78 @@ export default {
             // Serial
             serialSeason: 1,
             serialSeries: 11,
-            serialSeriesMinutes: 40
-
+            serialSeriesMinutes: 40,
+            
+            // Теги
+            tagTitle: '',
+            tagsUsed: [],
+            tagMenuShow: false,
+            tags: [
+            {
+                title: 'Comedy',
+                use: false
+            },
+            {
+                title: 'Western',
+                use: false
+            },
+            {
+                title: 'Adventure',
+                use: false
+            }
+        ]
         }
     },
     methods:{
+        newTag () {
+            if(this.tagTitle === ''){
+                return
+            }
+            this.tags.push({
+                title: this.tagTitle,
+                used: false
+            })
+            // const tag = {
+            //     title: this.tagTitle
+            // }
+        },
         newTask () {
             if(this.taskTitle === ''){
                 return
             }
+
+            let time 
+            if(this.whatWhatch === 'Film') {
+                time = this.filmTime
+            }else{
+                time = this.serialTime
+            }
+
             const task = {
-                id: this.taskId,
                 title: this.taskTitle,
                 descriotion: this.taskDescription,
                 whatWhatch: this.whatWhatch,
+                time,
+                tags: this.tagsUsed,
                 completed: false,
                 editing: false
             }
+            this.$store.dispatch('newTask', task)
             console.log(task)
             //Reset
-            this.taskId += 1
             this.taskTitle = ''
             this.taskDescription = ''
+            this.tagsUsed = []
+        },
+        addTagused( tag ){
+            tag.use = !tag.use
+            if( tag.use ) {
+                this.tagsUsed.push({
+                    title: tag.title
+                })
+            }else{
+                this.tagsUsed.splice(tag.title, 1)
+            }
         },
         getHoursAndMinutes (minutes) {
             let hours = Math.trunc(minutes/60)
@@ -124,7 +211,7 @@ export default {
     },
     computed: {
         filmTime () {
-            let min = this.filmHours * 60 + this.filmMinutes
+            let min = (this.filmHours * 60) + (this.filmMinutes * 1)
             return this.getHoursAndMinutes(min)
         },
         serialTime () {
@@ -155,4 +242,51 @@ export default {
 .time-input
     max-width 80px
     margin-right 10px
+// Tags
+.tag-list
+    margin-bottom 20px
+.ui-tag__wrapper
+    margin-right 18px
+    margin-bottom 10px
+    &:last  
+        margin-right 0
+
+.ui-tag
+    .button-close
+        &.active    
+            transform rotate(45deg)
+    &.used
+        background-color #444ce0        
+        color #fff
+        .button-close
+            &:before
+            &:after
+                background-color #fff
+// Tag Menu Show
+.tag-list--menu
+  display flex
+  justify-content space-between
+  align-items center
+// New Tag Input
+.tag-add--input
+  margin-bottom 0
+  margin-right 10px
+  height 42px
+
+// Total Time
+.total-time
+  p
+    margin-bottom 6px
+  span
+    margin-right 16px
+  .task-input
+    max-width 80px
+    margin-bottom 28px
+    margin-right 10px
+
+.button-list
+  display flex
+  justify-content flex-end
+
+
 </style>
